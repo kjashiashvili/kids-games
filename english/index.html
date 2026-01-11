@@ -1,185 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>English Quiz for Kids</title>
+<title>English Quiz</title>
 
 <style>
-body{
-  margin:0;
-  font-family: "Comic Sans MS", Arial, sans-serif;
-  background: linear-gradient(135deg,#c3f0ff,#ffe4f2);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f2f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.game{
-  background:#fff;
-  width:95%;
-  max-width:420px;
-  border-radius:25px;
-  padding:20px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.15);
-  text-align:center;
+.box {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  text-align: center;
 }
 
-h1{
-  color:#6c5ce7;
-  margin-bottom:10px;
+h1 { color: #6c5ce7; }
+
+#question {
+  font-size: 22px;
+  margin: 20px 0;
 }
 
-.progress{
-  font-size:14px;
-  margin-bottom:10px;
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  background: #74b9ff;
+  color: white;
+  cursor: pointer;
 }
 
-.score{
-  font-size:16px;
-  margin-bottom:15px;
-}
+button:hover { background: #0984e3; }
 
-.question{
-  font-size:22px;
-  margin:20px 0;
-}
-
-.answers{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-button{
-  padding:14px;
-  font-size:18px;
-  border:none;
-  border-radius:15px;
-  cursor:pointer;
-  background:#74b9ff;
-  color:#fff;
-  transition:0.2s;
-}
-
-button:hover{
-  background:#0984e3;
-}
-
-.correct{
-  background:#00b894 !important;
-}
-
-.wrong{
-  background:#d63031 !important;
-}
-
-.result{
-  font-size:22px;
-  color:#2d3436;
-}
+#info { margin-top: 10px; }
 </style>
 </head>
 
 <body>
 
-<div class="game">
+<div class="box">
   <h1>⭐ English Quiz ⭐</h1>
-  <div class="progress" id="progress"></div>
-  <div class="score">Score: <span id="score">0</span></div>
-  <div class="question" id="question"></div>
+  <div id="progress"></div>
+  <div id="question"></div>
 
-  <div class="answers">
-    <button onclick="answer(0)" id="a"></button>
-    <button onclick="answer(1)" id="b"></button>
-    <button onclick="answer(2)" id="c"></button>
-  </div>
+  <button onclick="check(0)" id="a"></button>
+  <button onclick="check(1)" id="b"></button>
+  <button onclick="check(2)" id="c"></button>
+
+  <div id="info"></div>
 </div>
 
 <script>
-const questions = [
-["Apple is a ...","fruit","animal","color",0],
-["Dog is an ...","animal","fruit","number",0],
-["Sun is ...","yellow","blue","black",0],
-["Cat says ...","meow","moo","woof",0],
-["Milk is ...","white","red","green",0],
-["Banana is ...","yellow","blue","pink",0],
-["Fish lives in ...","water","air","tree",0],
-["Bird can ...","fly","swim","read",0],
-["Ice is ...","cold","hot","sweet",0],
-["Fire is ...","hot","cold","blue",0],
-
-["Car has ...","wheels","wings","tails",0],
-["Teacher works at ...","school","hospital","zoo",0],
-["Doctor works at ...","hospital","school","shop",0],
-["Cow gives ...","milk","juice","water",0],
-["The sky is ...","blue","green","red",0],
-["Grass is ...","green","black","yellow",0],
-["Snow is ...","white","blue","brown",0],
-["Baby is ...","small","old","tall",0],
-["Elephant is ...","big","small","short",0],
-["Lion is ...","wild","sweet","soft",0],
-
-["One plus one is ...","two","three","four",0],
-["We read a ...","book","shoe","apple",0],
-["We drink ...","water","stone","paper",0],
-["We eat with ...","mouth","ear","eye",0],
-["Hand has ...","fingers","wheels","tails",0],
-["Day is ...","bright","dark","black",0],
-["Night is ...","dark","yellow","hot",0],
-["Tree has ...","leaves","windows","doors",0],
-["Fish can ...","swim","fly","run",0],
-["Bird has ...","wings","hands","boots",0],
-
-["Bus is a ...","vehicle","animal","fruit",0],
-["Red and blue make ...","purple","green","black",0],
-["Shoes go on ...","feet","hands","head",0],
-["Hat goes on ...","head","foot","hand",0],
-["We see with ...","eyes","ears","nose",0],
-["We hear with ...","ears","eyes","mouth",0],
-["Ball is ...","round","square","long",0],
-["Chair is for ...","sitting","sleeping","driving",0],
-["Bed is for ...","sleeping","eating","jumping",0],
-["Clock shows ...","time","food","weather",0]
+const data = [
+ {q:"Cat is a…", a:["animal","fruit","color"], c:0},
+ {q:"Apple is a…", a:["animal","fruit","drink"], c:1},
+ {q:"Sky is…", a:["blue","green","red"], c:0},
+ {q:"Dog says…", a:["meow","woof","moo"], c:1},
+ {q:"Milk is…", a:["food","drink","animal"], c:1},
 ];
 
-let index = 0;
+while (data.length < 50) data.push(...data);
+data.length = 50;
+
+let i = 0;
 let score = 0;
 
-function load(){
-  document.getElementById("progress").innerText = `Question ${index+1} / 50`;
-  document.getElementById("question").innerText = questions[index][0];
-  document.getElementById("a").innerText = "A) " + questions[index][1];
-  document.getElementById("b").innerText = "B) " + questions[index][2];
-  document.getElementById("c").innerText = "C) " + questions[index][3];
+function show() {
+  document.getElementById("progress").innerText =
+    `Question ${i+1} / 50`;
+  document.getElementById("question").innerText = data[i].q;
+  document.getElementById("a").innerText = "A) " + data[i].a[0];
+  document.getElementById("b").innerText = "B) " + data[i].a[1];
+  document.getElementById("c").innerText = "C) " + data[i].a[2];
+  document.getElementById("info").innerText = "Score: " + score;
 }
 
-function answer(n){
-  let correct = questions[index][4];
-  let btns = document.querySelectorAll("button");
-  if(n === correct){
-    btns[n].classList.add("correct");
-    score += 2;
-    document.getElementById("score").innerText = score;
-  }else{
-    btns[n].classList.add("wrong");
-    btns[correct].classList.add("correct");
+function check(n) {
+  if (n === data[i].c) score++;
+  i++;
+  if (i < 50) show();
+  else {
+    document.querySelector(".box").innerHTML =
+      `<h1>Finished 🎉</h1><p>Score: ${score} / 50</p>`;
   }
-
-  setTimeout(()=>{
-    btns.forEach(b=>b.className="");
-    index++;
-    if(index < questions.length){
-      load();
-    }else{
-      document.querySelector(".game").innerHTML =
-      `<div class="result">🎉 Finished!<br>Score: ${score} / 100</div>`;
-    }
-  },800);
 }
 
-load();
+show();
 </script>
 
 </body>
