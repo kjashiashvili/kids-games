@@ -1,107 +1,96 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ka">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>English Quiz</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f2f6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.box {
-  background: white;
-  width: 90%;
-  max-width: 400px;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  text-align: center;
-}
-
-h1 { color: #6c5ce7; }
-
-#question {
-  font-size: 22px;
-  margin: 20px 0;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  margin: 8px 0;
-  font-size: 18px;
-  border-radius: 10px;
-  border: none;
-  background: #74b9ff;
-  color: white;
-  cursor: pointer;
-}
-
-button:hover { background: #0984e3; }
-
-#info { margin-top: 10px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Game for Kids</title>
+    <style>
+        :root {
+            --primary: #6C5CE7; --success: #00B894; --error: #FF7675;
+            --bg: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+        }
+        body {
+            font-family: sans-serif; background: var(--bg);
+            margin: 0; display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; touch-action: manipulation;
+        }
+        #game-container {
+            background: white; width: 90%; max-width: 500px; padding: 25px;
+            border-radius: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            text-align: center; position: relative;
+        }
+        .header { display: flex; justify-content: space-between; color: var(--primary); font-weight: bold; margin-bottom: 20px; }
+        #question { font-size: 2.5rem; margin: 20px 0; color: #2D3436; font-weight: bold; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 600px) { .options-grid { grid-template-columns: 1fr 1fr; } }
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 20px;
+            font-size: 1.4rem; border-radius: 20px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 5px 0 #4834d4;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        #message { margin-top: 20px; font-weight: bold; height: 30px; font-size: 1.2rem; }
+        #win-screen {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; border-radius: 30px; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 10;
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="box">
-  <h1>⭐ English Quiz ⭐</h1>
-  <div id="progress"></div>
-  <div id="question"></div>
-
-  <button onclick="check(0)" id="a"></button>
-  <button onclick="check(1)" id="b"></button>
-  <button onclick="check(2)" id="c"></button>
-
-  <div id="info"></div>
+<div id="game-container">
+    <div id="win-screen">
+        <h1 style="color:var(--success)">ყოჩაღ! 🎉</h1>
+        <p>შენ ნამდვილი ვარსკვლავი ხარ!</p>
+        <button class="btn" onclick="location.reload()">თავიდან დაწყება 🔄</button>
+    </div>
+    <div class="header">
+        <div>⭐ ქულა: <span id="score">0</span></div>
+        <div>დონე: <span id="level">1</span>/20</div>
+    </div>
+    <div id="question">Loading...</div>
+    <div class="options-grid" id="options"></div>
+    <div id="message">წარმატებები! 🚀</div>
 </div>
-
 <script>
-const data = [
- {q:"Cat is a…", a:["animal","fruit","color"], c:0},
- {q:"Apple is a…", a:["animal","fruit","drink"], c:1},
- {q:"Sky is…", a:["blue","green","red"], c:0},
- {q:"Dog says…", a:["meow","woof","moo"], c:1},
- {q:"Milk is…", a:["food","drink","animal"], c:1},
-];
-
-while (data.length < 50) data.push(...data);
-data.length = 50;
-
-let i = 0;
-let score = 0;
-
-function show() {
-  document.getElementById("progress").innerText =
-    `Question ${i+1} / 50`;
-  document.getElementById("question").innerText = data[i].q;
-  document.getElementById("a").innerText = "A) " + data[i].a[0];
-  document.getElementById("b").innerText = "B) " + data[i].a[1];
-  document.getElementById("c").innerText = "C) " + data[i].a[2];
-  document.getElementById("info").innerText = "Score: " + score;
-}
-
-function check(n) {
-  if (n === data[i].c) score++;
-  i++;
-  if (i < 50) show();
-  else {
-    document.querySelector(".box").innerHTML =
-      `<h1>Finished 🎉</h1><p>Score: ${score} / 50</p>`;
-  }
-}
-
-show();
+    let score = 0, level = 1, correctAnswer = "";
+    const questions = [
+        { q: "Apple is...", a: "Red", o: ["Red", "Blue", "Green", "Yellow"] },
+        { q: "How many eyes?", a: "Two", o: ["One", "Two", "Three", "Five"] },
+        { q: "Elephant is...", a: "Big", o: ["Small", "Big", "Fast", "Green"] },
+        { q: "Sky is...", a: "Blue", o: ["Pink", "Blue", "Black", "Orange"] },
+        { q: "Cat says...", a: "Meow", o: ["Woof", "Moo", "Meow", "Tweet"] }
+        // Можно добавить еще до 20
+    ];
+    function load() {
+        if (level > 20 || level > questions.length) { document.getElementById('win-screen').style.display = 'flex'; return; }
+        let q = questions[level-1];
+        correctAnswer = q.a;
+        document.getElementById('question').innerText = q.q;
+        const div = document.getElementById('options');
+        div.innerHTML = '';
+        q.o.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = 'btn'; b.innerText = opt;
+            b.onclick = () => check(opt, b);
+            div.appendChild(b);
+        });
+    }
+    function check(opt, b) {
+        const m = document.getElementById('message');
+        if (opt === correctAnswer) {
+            b.style.background = "var(--success)"; score += 10; level++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('level').innerText = Math.min(level, 20);
+            m.style.color = "var(--success)"; m.innerText = "ვაუ! შესანიშნავია! 🎉";
+            setTimeout(load, 1000);
+        } else {
+            b.style.background = "var(--error)"; m.style.color = "var(--error)";
+            m.innerText = "სცადე კიდევ ერთხელ! 😊";
+            setTimeout(() => { b.style.background = "var(--primary)"; m.innerText = ""; }, 800);
+        }
+    }
+    load();
 </script>
-
 </body>
 </html>
